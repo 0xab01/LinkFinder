@@ -294,7 +294,7 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--input",
                         help="Input a: URL, file or folder. \
                         For folders a wildcard can be used (e.g. '/*.js').",
-                        required="True", action="store")
+                        required=True, action="store")
     parser.add_argument("-o", "--output",
                         help="Where to save the file, \
                         including file name. Default: output.html",
@@ -309,13 +309,16 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--cookies",
                         help="Add cookies for authenticated JS files",
                         action="store", default="")
+    parser.add_argument("-list", "--listfile",
+                        help="File containing a list of JavaScript URLs to process.",
+                        action="store")
     default_timeout = 10
     parser.add_argument("-t", "--timeout",
                         help="How many seconds to wait for the server to send data before giving up (default: " + str(default_timeout) + " seconds)",
                         default=default_timeout, type=int, metavar="<seconds>")
     args = parser.parse_args()
 
-    if args.input[-1:] == "/":
+    if args.input and args.input[-1:] == "/":
         args.input = args.input[:-1]
 
     mode = 1
@@ -324,6 +327,11 @@ if __name__ == "__main__":
 
     # Convert input to URLs or JS files
     urls = parser_input(args.input)
+
+    # Process the list of URLs if the listfile argument is provided
+    if args.listfile:
+        with open(args.listfile, 'r') as f:
+            urls.extend(line.strip() for line in f if line.strip())
 
     # Convert URLs to JS
     output = ''
